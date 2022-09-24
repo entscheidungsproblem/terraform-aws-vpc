@@ -14,6 +14,11 @@ variable "cidr" {
   description = "The CIDR block for the VPC. Default value is a valid CIDR, but not acceptable by AWS and should be overridden"
   type        = string
   default     = "0.0.0.0/0"
+
+  validation {
+    condition     = can(cidrhost(var.cidr, 0))
+    error_message = "Must be valid IPv4 CIDR."
+  }
 }
 
 variable "enable_ipv6" {
@@ -24,43 +29,43 @@ variable "enable_ipv6" {
 
 variable "private_subnet_ipv6_prefixes" {
   description = "Assigns IPv6 private subnet id based on the Amazon provided /56 prefix base 10 integer (0-256). Must be of equal length to the corresponding IPv4 subnet list"
-  type        = list(string)
+  type        = list(number)
   default     = []
 }
 
 variable "public_subnet_ipv6_prefixes" {
   description = "Assigns IPv6 public subnet id based on the Amazon provided /56 prefix base 10 integer (0-256). Must be of equal length to the corresponding IPv4 subnet list"
-  type        = list(string)
+  type        = list(number)
   default     = []
 }
 
 variable "outpost_subnet_ipv6_prefixes" {
   description = "Assigns IPv6 outpost subnet id based on the Amazon provided /56 prefix base 10 integer (0-256). Must be of equal length to the corresponding IPv4 subnet list"
-  type        = list(string)
+  type        = list(number)
   default     = []
 }
 
 variable "database_subnet_ipv6_prefixes" {
   description = "Assigns IPv6 database subnet id based on the Amazon provided /56 prefix base 10 integer (0-256). Must be of equal length to the corresponding IPv4 subnet list"
-  type        = list(string)
+  type        = list(number)
   default     = []
 }
 
 variable "redshift_subnet_ipv6_prefixes" {
   description = "Assigns IPv6 redshift subnet id based on the Amazon provided /56 prefix base 10 integer (0-256). Must be of equal length to the corresponding IPv4 subnet list"
-  type        = list(string)
+  type        = list(number)
   default     = []
 }
 
 variable "elasticache_subnet_ipv6_prefixes" {
   description = "Assigns IPv6 elasticache subnet id based on the Amazon provided /56 prefix base 10 integer (0-256). Must be of equal length to the corresponding IPv4 subnet list"
-  type        = list(string)
+  type        = list(number)
   default     = []
 }
 
 variable "intra_subnet_ipv6_prefixes" {
   description = "Assigns IPv6 intra subnet id based on the Amazon provided /56 prefix base 10 integer (0-256). Must be of equal length to the corresponding IPv4 subnet list"
-  type        = list(string)
+  type        = list(number)
   default     = []
 }
 
@@ -116,6 +121,11 @@ variable "secondary_cidr_blocks" {
   description = "List of secondary CIDR blocks to associate with the VPC to extend the IP Address pool"
   type        = list(string)
   default     = []
+
+  validation {
+    condition     = alltrue([for cidr in var.secondary_cidr_blocks : can(cidrhost(cidr, 0))])
+    error_message = "Must all be valid IPv4 CIDRs."
+  }
 }
 
 variable "instance_tenancy" {
@@ -170,42 +180,77 @@ variable "public_subnets" {
   description = "A list of public subnets inside the VPC"
   type        = list(string)
   default     = []
+
+  validation {
+    condition     = alltrue([for cidr in var.public_subnets : can(cidrhost(cidr, 0))])
+    error_message = "Must all be valid IPv4 CIDRs."
+  }
 }
 
 variable "private_subnets" {
   description = "A list of private subnets inside the VPC"
   type        = list(string)
   default     = []
+
+  validation {
+    condition     = alltrue([for cidr in var.private_subnets : can(cidrhost(cidr, 0))])
+    error_message = "Must all be valid IPv4 CIDRs."
+  }
 }
 
 variable "outpost_subnets" {
   description = "A list of outpost subnets inside the VPC"
   type        = list(string)
   default     = []
+
+  validation {
+    condition     = alltrue([for cidr in var.outpost_subnets : can(cidrhost(cidr, 0))])
+    error_message = "Must all be valid IPv4 CIDRs."
+  }
 }
 
 variable "database_subnets" {
   description = "A list of database subnets"
   type        = list(string)
   default     = []
+
+  validation {
+    condition     = alltrue([for cidr in var.database_subnets : can(cidrhost(cidr, 0))])
+    error_message = "Must all be valid IPv4 CIDRs."
+  }
 }
 
 variable "redshift_subnets" {
   description = "A list of redshift subnets"
   type        = list(string)
   default     = []
+
+  validation {
+    condition     = alltrue([for cidr in var.redshift_subnets : can(cidrhost(cidr, 0))])
+    error_message = "Must all be valid IPv4 CIDRs."
+  }
 }
 
 variable "elasticache_subnets" {
   description = "A list of elasticache subnets"
   type        = list(string)
   default     = []
+
+  validation {
+    condition     = alltrue([for cidr in var.elasticache_subnets : can(cidrhost(cidr, 0))])
+    error_message = "Must all be valid IPv4 CIDRs."
+  }
 }
 
 variable "intra_subnets" {
   description = "A list of intra subnets"
   type        = list(string)
   default     = []
+
+  validation {
+    condition     = alltrue([for cidr in var.intra_subnets : can(cidrhost(cidr, 0))])
+    error_message = "Must all be valid IPv4 CIDRs."
+  }
 }
 
 variable "create_database_subnet_route_table" {
@@ -304,6 +349,11 @@ variable "nat_gateway_destination_cidr_block" {
   description = "Used to pass a custom destination route for private NAT Gateway. If not specified, the default 0.0.0.0/0 is used as a destination route."
   type        = string
   default     = "0.0.0.0/0"
+
+  validation {
+    condition     = can(cidrhost(var.nat_gateway_destination_cidr_block, 0))
+    error_message = "Must be valid IPv4 CIDR."
+  }
 }
 
 variable "single_nat_gateway" {
@@ -334,6 +384,11 @@ variable "external_nat_ips" {
   description = "List of EIPs to be used for `nat_public_ips` output (used in combination with reuse_nat_ips and external_nat_ip_ids)"
   type        = list(string)
   default     = []
+
+  validation {
+    condition     = alltrue([for ip in var.external_nat_ips : can(cidrhost("${ip}/0", 0))])
+    error_message = "Must all be valid IPv4 IPs."
+  }
 }
 
 variable "map_public_ip_on_launch" {
@@ -344,8 +399,19 @@ variable "map_public_ip_on_launch" {
 
 variable "customer_gateways" {
   description = "Maps of Customer Gateway's attributes (BGP ASN and Gateway's Internet-routable external IP address)"
-  type        = map(map(any))
-  default     = {}
+  type = map(
+    object({
+      bgp_asn     = number
+      ip_address  = string
+      device_name = optional(string)
+    })
+  )
+  default = {}
+
+  validation {
+    condition     = alltrue([for gateway in var.customer_gateways : can(cidrhost("${gateway.ip_address}/0", 0))])
+    error_message = "The values for ip_address must all be valid IPv4 IPs."
+  }
 }
 
 variable "enable_vpn_gateway" {
@@ -410,8 +476,28 @@ variable "default_route_table_propagating_vgws" {
 
 variable "default_route_table_routes" {
   description = "Configuration block of routes. See https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/default_route_table#route"
-  type        = list(map(string))
-  default     = []
+  type = list(object({
+    cidr_block                = string
+    ipv6_cidr_block           = string
+    egress_only_gateway_id    = string
+    gateway_id                = string
+    instance_id               = string
+    nat_gateway_id            = string
+    network_interface_id      = string
+    transit_gateway_id        = string
+    vpc_endpoint_id           = string
+    vpc_peering_connection_id = string
+  }))
+  default = []
+
+  validation {
+    condition     = alltrue([for route in var.default_route_table_routes : can(cidrhost(route.cidr_block, 0))])
+    error_message = "The values for cidr_block must all be valid IPv4 CIDRs."
+  }
+  validation {
+    condition     = alltrue([for route in var.default_route_table_routes : can(cidrhost(route.ipv6_cidr_block, 0))])
+    error_message = "The values for ipv6_cidr_block must all be valid IPv6 CIDRs."
+  }
 }
 
 variable "default_route_table_tags" {
@@ -658,18 +744,33 @@ variable "dhcp_options_ntp_servers" {
   description = "Specify a list of NTP servers for DHCP options set (requires enable_dhcp_options set to true)"
   type        = list(string)
   default     = []
+
+  validation {
+    condition     = alltrue([for server in var.dhcp_options_ntp_servers : can(cidrhost("${server}/32", 0))])
+    error_message = "Each of the ntp server must all be valid IPv4."
+  }
 }
 
 variable "dhcp_options_netbios_name_servers" {
   description = "Specify a list of netbios servers for DHCP options set (requires enable_dhcp_options set to true)"
   type        = list(string)
   default     = []
+
+  validation {
+    condition     = alltrue([for server in var.dhcp_options_netbios_name_servers : can(cidrhost("${server}/32", 0))])
+    error_message = "Each of the netbios server must all be valid IPv4."
+  }
 }
 
 variable "dhcp_options_netbios_node_type" {
   description = "Specify netbios node_type for DHCP options set (requires enable_dhcp_options set to true)"
-  type        = string
-  default     = ""
+  type        = number
+  default     = null
+
+  validation {
+    condition     = contains(["null", 1, 2, 4, 8], coalesce(var.dhcp_options_netbios_node_type, "null"))
+    error_message = "NetBIOS node type must be 1, 2, 4, or 8."
+  }
 }
 
 variable "manage_default_vpc" {
@@ -771,7 +872,17 @@ variable "elasticache_dedicated_network_acl" {
 
 variable "default_network_acl_ingress" {
   description = "List of maps of ingress rules to set on the Default Network ACL"
-  type        = list(map(string))
+  type = list(object({
+    action          = string
+    cidr_block      = optional(string)
+    from_port       = number
+    icmp_code       = optional(number)
+    icmp_type       = optional(number)
+    ipv6_cidr_block = optional(string)
+    protocol        = any
+    rule_no         = number
+    to_port         = number
+  }))
 
   default = [
     {
@@ -779,7 +890,7 @@ variable "default_network_acl_ingress" {
       action     = "allow"
       from_port  = 0
       to_port    = 0
-      protocol   = "-1"
+      protocol   = -1
       cidr_block = "0.0.0.0/0"
     },
     {
@@ -787,15 +898,35 @@ variable "default_network_acl_ingress" {
       action          = "allow"
       from_port       = 0
       to_port         = 0
-      protocol        = "-1"
+      protocol        = -1
       ipv6_cidr_block = "::/0"
     },
   ]
+
+  validation {
+    condition     = alltrue([for rule in var.default_network_acl_ingress : can(cidrhost(rule.cidr_block, 0)) || rule.cidr_block == null])
+    error_message = "The values for cidr_block must all be valid IPv4 CIDRs."
+  }
+  validation {
+    condition     = alltrue([for rule in var.default_network_acl_ingress : can(cidrhost(rule.ipv6_cidr_block, 0)) || rule.ipv6_cidr_block == null])
+    error_message = "The values for ipv6_cidr_block must all be valid IPv6 CIDRs."
+  }
+
 }
 
 variable "default_network_acl_egress" {
   description = "List of maps of egress rules to set on the Default Network ACL"
-  type        = list(map(string))
+  type = list(object({
+    action          = string
+    cidr_block      = optional(string)
+    from_port       = number
+    icmp_code       = optional(number)
+    icmp_type       = optional(number)
+    ipv6_cidr_block = optional(string)
+    protocol        = any
+    rule_no         = number
+    to_port         = number
+  }))
 
   default = [
     {
@@ -803,7 +934,7 @@ variable "default_network_acl_egress" {
       action     = "allow"
       from_port  = 0
       to_port    = 0
-      protocol   = "-1"
+      protocol   = -1
       cidr_block = "0.0.0.0/0"
     },
     {
@@ -811,15 +942,34 @@ variable "default_network_acl_egress" {
       action          = "allow"
       from_port       = 0
       to_port         = 0
-      protocol        = "-1"
+      protocol        = -1
       ipv6_cidr_block = "::/0"
     },
   ]
+
+  validation {
+    condition     = alltrue([for rule in var.default_network_acl_egress : can(cidrhost(rule.cidr_block, 0)) || rule.cidr_block == null])
+    error_message = "The values for cidr_block must all be valid IPv4 CIDRs."
+  }
+  validation {
+    condition     = alltrue([for rule in var.default_network_acl_egress : can(cidrhost(rule.ipv6_cidr_block, 0)) || rule.ipv6_cidr_block == null])
+    error_message = "The values for ipv6_cidr_block must all be valid IPv6 CIDRs."
+  }
 }
 
 variable "public_inbound_acl_rules" {
   description = "Public subnets inbound network ACLs"
-  type        = list(map(string))
+  type = list(object({
+    rule_number     = number
+    rule_action     = string
+    from_port       = optional(number)
+    to_port         = optional(number)
+    icmp_code       = optional(number)
+    icmp_type       = optional(number)
+    protocol        = any
+    cidr_block      = optional(string)
+    ipv6_cidr_block = optional(string)
+  }))
 
   default = [
     {
@@ -827,15 +977,34 @@ variable "public_inbound_acl_rules" {
       rule_action = "allow"
       from_port   = 0
       to_port     = 0
-      protocol    = "-1"
+      protocol    = -1
       cidr_block  = "0.0.0.0/0"
     },
   ]
+
+  validation {
+    condition     = alltrue([for rule in var.public_inbound_acl_rules : can(cidrhost(rule.cidr_block, 0)) || rule.cidr_block == null])
+    error_message = "The values for cidr_block must all be valid IPv4 CIDRs."
+  }
+  validation {
+    condition     = alltrue([for rule in var.public_inbound_acl_rules : can(cidrhost(rule.ipv6_cidr_block, 0)) || rule.ipv6_cidr_block == null])
+    error_message = "The values for ipv6_cidr_block must all be valid IPv6 CIDRs."
+  }
 }
 
 variable "public_outbound_acl_rules" {
   description = "Public subnets outbound network ACLs"
-  type        = list(map(string))
+  type = list(object({
+    rule_number     = number
+    rule_action     = string
+    from_port       = optional(number)
+    to_port         = optional(number)
+    icmp_code       = optional(number)
+    icmp_type       = optional(number)
+    protocol        = any
+    cidr_block      = optional(string)
+    ipv6_cidr_block = optional(string)
+  }))
 
   default = [
     {
@@ -843,15 +1012,34 @@ variable "public_outbound_acl_rules" {
       rule_action = "allow"
       from_port   = 0
       to_port     = 0
-      protocol    = "-1"
+      protocol    = -1
       cidr_block  = "0.0.0.0/0"
     },
   ]
+
+  validation {
+    condition     = alltrue([for rule in var.public_outbound_acl_rules : can(cidrhost(rule.cidr_block, 0)) || rule.cidr_block == null])
+    error_message = "The values for cidr_block must all be valid IPv4 CIDRs."
+  }
+  validation {
+    condition     = alltrue([for rule in var.public_outbound_acl_rules : can(cidrhost(rule.ipv6_cidr_block, 0)) || rule.ipv6_cidr_block == null])
+    error_message = "The values for ipv6_cidr_block must all be valid IPv6 CIDRs."
+  }
 }
 
 variable "private_inbound_acl_rules" {
   description = "Private subnets inbound network ACLs"
-  type        = list(map(string))
+  type = list(object({
+    rule_number     = number
+    rule_action     = string
+    from_port       = optional(number)
+    to_port         = optional(number)
+    icmp_code       = optional(number)
+    icmp_type       = optional(number)
+    protocol        = any
+    cidr_block      = optional(string)
+    ipv6_cidr_block = optional(string)
+  }))
 
   default = [
     {
@@ -859,15 +1047,34 @@ variable "private_inbound_acl_rules" {
       rule_action = "allow"
       from_port   = 0
       to_port     = 0
-      protocol    = "-1"
+      protocol    = -1
       cidr_block  = "0.0.0.0/0"
     },
   ]
+
+  validation {
+    condition     = alltrue([for rule in var.private_inbound_acl_rules : can(cidrhost(rule.cidr_block, 0)) || rule.cidr_block == null])
+    error_message = "The values for cidr_block must all be valid IPv4 CIDRs."
+  }
+  validation {
+    condition     = alltrue([for rule in var.private_inbound_acl_rules : can(cidrhost(rule.ipv6_cidr_block, 0)) || rule.ipv6_cidr_block == null])
+    error_message = "The values for ipv6_cidr_block must all be valid IPv6 CIDRs."
+  }
 }
 
 variable "private_outbound_acl_rules" {
   description = "Private subnets outbound network ACLs"
-  type        = list(map(string))
+  type = list(object({
+    rule_number     = number
+    rule_action     = string
+    from_port       = optional(number)
+    to_port         = optional(number)
+    icmp_code       = optional(number)
+    icmp_type       = optional(number)
+    protocol        = any
+    cidr_block      = optional(string)
+    ipv6_cidr_block = optional(string)
+  }))
 
   default = [
     {
@@ -875,15 +1082,34 @@ variable "private_outbound_acl_rules" {
       rule_action = "allow"
       from_port   = 0
       to_port     = 0
-      protocol    = "-1"
+      protocol    = -1
       cidr_block  = "0.0.0.0/0"
     },
   ]
+
+  validation {
+    condition     = alltrue([for rule in var.private_outbound_acl_rules : can(cidrhost(rule.cidr_block, 0)) || rule.cidr_block == null])
+    error_message = "The values for cidr_block must all be valid IPv4 CIDRs."
+  }
+  validation {
+    condition     = alltrue([for rule in var.private_outbound_acl_rules : can(cidrhost(rule.ipv6_cidr_block, 0)) || rule.ipv6_cidr_block == null])
+    error_message = "The values for ipv6_cidr_block must all be valid IPv6 CIDRs."
+  }
 }
 
 variable "outpost_inbound_acl_rules" {
   description = "Outpost subnets inbound network ACLs"
-  type        = list(map(string))
+  type = list(object({
+    rule_number     = number
+    rule_action     = string
+    from_port       = optional(number)
+    to_port         = optional(number)
+    icmp_code       = optional(number)
+    icmp_type       = optional(number)
+    protocol        = any
+    cidr_block      = optional(string)
+    ipv6_cidr_block = optional(string)
+  }))
 
   default = [
     {
@@ -891,15 +1117,34 @@ variable "outpost_inbound_acl_rules" {
       rule_action = "allow"
       from_port   = 0
       to_port     = 0
-      protocol    = "-1"
+      protocol    = -1
       cidr_block  = "0.0.0.0/0"
     },
   ]
+
+  validation {
+    condition     = alltrue([for rule in var.outpost_inbound_acl_rules : can(cidrhost(rule.cidr_block, 0)) || rule.cidr_block == null])
+    error_message = "The values for cidr_block must all be valid IPv4 CIDRs."
+  }
+  validation {
+    condition     = alltrue([for rule in var.outpost_inbound_acl_rules : can(cidrhost(rule.ipv6_cidr_block, 0)) || rule.ipv6_cidr_block == null])
+    error_message = "The values for ipv6_cidr_block must all be valid IPv6 CIDRs."
+  }
 }
 
 variable "outpost_outbound_acl_rules" {
   description = "Outpost subnets outbound network ACLs"
-  type        = list(map(string))
+  type = list(object({
+    rule_number     = number
+    rule_action     = string
+    from_port       = optional(number)
+    to_port         = optional(number)
+    icmp_code       = optional(number)
+    icmp_type       = optional(number)
+    protocol        = any
+    cidr_block      = optional(string)
+    ipv6_cidr_block = optional(string)
+  }))
 
   default = [
     {
@@ -907,15 +1152,34 @@ variable "outpost_outbound_acl_rules" {
       rule_action = "allow"
       from_port   = 0
       to_port     = 0
-      protocol    = "-1"
+      protocol    = -1
       cidr_block  = "0.0.0.0/0"
     },
   ]
+
+  validation {
+    condition     = alltrue([for rule in var.outpost_outbound_acl_rules : can(cidrhost(rule.cidr_block, 0)) || rule.cidr_block == null])
+    error_message = "The values for cidr_block must all be valid IPv4 CIDRs."
+  }
+  validation {
+    condition     = alltrue([for rule in var.outpost_outbound_acl_rules : can(cidrhost(rule.ipv6_cidr_block, 0)) || rule.ipv6_cidr_block == null])
+    error_message = "The values for ipv6_cidr_block must all be valid IPv6 CIDRs."
+  }
 }
 
 variable "intra_inbound_acl_rules" {
   description = "Intra subnets inbound network ACLs"
-  type        = list(map(string))
+  type = list(object({
+    rule_number     = number
+    rule_action     = string
+    from_port       = optional(number)
+    to_port         = optional(number)
+    icmp_code       = optional(number)
+    icmp_type       = optional(number)
+    protocol        = any
+    cidr_block      = optional(string)
+    ipv6_cidr_block = optional(string)
+  }))
 
   default = [
     {
@@ -923,15 +1187,34 @@ variable "intra_inbound_acl_rules" {
       rule_action = "allow"
       from_port   = 0
       to_port     = 0
-      protocol    = "-1"
+      protocol    = -1
       cidr_block  = "0.0.0.0/0"
     },
   ]
+
+  validation {
+    condition     = alltrue([for rule in var.intra_inbound_acl_rules : can(cidrhost(rule.cidr_block, 0)) || rule.cidr_block == null])
+    error_message = "The values for cidr_block must all be valid IPv4 CIDRs."
+  }
+  validation {
+    condition     = alltrue([for rule in var.intra_inbound_acl_rules : can(cidrhost(rule.ipv6_cidr_block, 0)) || rule.ipv6_cidr_block == null])
+    error_message = "The values for ipv6_cidr_block must all be valid IPv6 CIDRs."
+  }
 }
 
 variable "intra_outbound_acl_rules" {
   description = "Intra subnets outbound network ACLs"
-  type        = list(map(string))
+  type = list(object({
+    rule_number     = number
+    rule_action     = string
+    from_port       = optional(number)
+    to_port         = optional(number)
+    icmp_code       = optional(number)
+    icmp_type       = optional(number)
+    protocol        = any
+    cidr_block      = optional(string)
+    ipv6_cidr_block = optional(string)
+  }))
 
   default = [
     {
@@ -939,15 +1222,34 @@ variable "intra_outbound_acl_rules" {
       rule_action = "allow"
       from_port   = 0
       to_port     = 0
-      protocol    = "-1"
+      protocol    = -1
       cidr_block  = "0.0.0.0/0"
     },
   ]
+
+  validation {
+    condition     = alltrue([for rule in var.intra_outbound_acl_rules : can(cidrhost(rule.cidr_block, 0)) || rule.cidr_block == null])
+    error_message = "The values for cidr_block must all be valid IPv4 CIDRs."
+  }
+  validation {
+    condition     = alltrue([for rule in var.intra_outbound_acl_rules : can(cidrhost(rule.ipv6_cidr_block, 0)) || rule.ipv6_cidr_block == null])
+    error_message = "The values for ipv6_cidr_block must all be valid IPv6 CIDRs."
+  }
 }
 
 variable "database_inbound_acl_rules" {
   description = "Database subnets inbound network ACL rules"
-  type        = list(map(string))
+  type = list(object({
+    rule_number     = number
+    rule_action     = string
+    from_port       = optional(number)
+    to_port         = optional(number)
+    icmp_code       = optional(number)
+    icmp_type       = optional(number)
+    protocol        = any
+    cidr_block      = optional(string)
+    ipv6_cidr_block = optional(string)
+  }))
 
   default = [
     {
@@ -955,15 +1257,34 @@ variable "database_inbound_acl_rules" {
       rule_action = "allow"
       from_port   = 0
       to_port     = 0
-      protocol    = "-1"
+      protocol    = -1
       cidr_block  = "0.0.0.0/0"
     },
   ]
+
+  validation {
+    condition     = alltrue([for rule in var.database_inbound_acl_rules : can(cidrhost(rule.cidr_block, 0)) || rule.cidr_block == null])
+    error_message = "The values for cidr_block must all be valid IPv4 CIDRs."
+  }
+  validation {
+    condition     = alltrue([for rule in var.database_inbound_acl_rules : can(cidrhost(rule.ipv6_cidr_block, 0)) || rule.ipv6_cidr_block == null])
+    error_message = "The values for ipv6_cidr_block must all be valid IPv6 CIDRs."
+  }
 }
 
 variable "database_outbound_acl_rules" {
   description = "Database subnets outbound network ACL rules"
-  type        = list(map(string))
+  type = list(object({
+    rule_number     = number
+    rule_action     = string
+    from_port       = optional(number)
+    to_port         = optional(number)
+    icmp_code       = optional(number)
+    icmp_type       = optional(number)
+    protocol        = any
+    cidr_block      = optional(string)
+    ipv6_cidr_block = optional(string)
+  }))
 
   default = [
     {
@@ -971,15 +1292,34 @@ variable "database_outbound_acl_rules" {
       rule_action = "allow"
       from_port   = 0
       to_port     = 0
-      protocol    = "-1"
+      protocol    = -1
       cidr_block  = "0.0.0.0/0"
     },
   ]
+
+  validation {
+    condition     = alltrue([for rule in var.database_outbound_acl_rules : can(cidrhost(rule.cidr_block, 0)) || rule.cidr_block == null])
+    error_message = "The values for cidr_block must all be valid IPv4 CIDRs."
+  }
+  validation {
+    condition     = alltrue([for rule in var.database_outbound_acl_rules : can(cidrhost(rule.ipv6_cidr_block, 0)) || rule.ipv6_cidr_block == null])
+    error_message = "The values for ipv6_cidr_block must all be valid IPv6 CIDRs."
+  }
 }
 
 variable "redshift_inbound_acl_rules" {
   description = "Redshift subnets inbound network ACL rules"
-  type        = list(map(string))
+  type = list(object({
+    rule_number     = number
+    rule_action     = string
+    from_port       = optional(number)
+    to_port         = optional(number)
+    icmp_code       = optional(number)
+    icmp_type       = optional(number)
+    protocol        = any
+    cidr_block      = optional(string)
+    ipv6_cidr_block = optional(string)
+  }))
 
   default = [
     {
@@ -987,15 +1327,34 @@ variable "redshift_inbound_acl_rules" {
       rule_action = "allow"
       from_port   = 0
       to_port     = 0
-      protocol    = "-1"
+      protocol    = -1
       cidr_block  = "0.0.0.0/0"
     },
   ]
+
+  validation {
+    condition     = alltrue([for rule in var.redshift_inbound_acl_rules : can(cidrhost(rule.cidr_block, 0)) || rule.cidr_block == null])
+    error_message = "The values for cidr_block must all be valid IPv4 CIDRs."
+  }
+  validation {
+    condition     = alltrue([for rule in var.redshift_inbound_acl_rules : can(cidrhost(rule.ipv6_cidr_block, 0)) || rule.ipv6_cidr_block == null])
+    error_message = "The values for ipv6_cidr_block must all be valid IPv6 CIDRs."
+  }
 }
 
 variable "redshift_outbound_acl_rules" {
   description = "Redshift subnets outbound network ACL rules"
-  type        = list(map(string))
+  type = list(object({
+    rule_number     = number
+    rule_action     = string
+    from_port       = optional(number)
+    to_port         = optional(number)
+    icmp_code       = optional(number)
+    icmp_type       = optional(number)
+    protocol        = any
+    cidr_block      = optional(string)
+    ipv6_cidr_block = optional(string)
+  }))
 
   default = [
     {
@@ -1003,15 +1362,34 @@ variable "redshift_outbound_acl_rules" {
       rule_action = "allow"
       from_port   = 0
       to_port     = 0
-      protocol    = "-1"
+      protocol    = -1
       cidr_block  = "0.0.0.0/0"
     },
   ]
+
+  validation {
+    condition     = alltrue([for rule in var.redshift_outbound_acl_rules : can(cidrhost(rule.cidr_block, 0)) || rule.cidr_block == null])
+    error_message = "The values for cidr_block must all be valid IPv4 CIDRs."
+  }
+  validation {
+    condition     = alltrue([for rule in var.redshift_outbound_acl_rules : can(cidrhost(rule.ipv6_cidr_block, 0)) || rule.ipv6_cidr_block == null])
+    error_message = "The values for ipv6_cidr_block must all be valid IPv6 CIDRs."
+  }
 }
 
 variable "elasticache_inbound_acl_rules" {
   description = "Elasticache subnets inbound network ACL rules"
-  type        = list(map(string))
+  type = list(object({
+    rule_number     = number
+    rule_action     = string
+    from_port       = optional(number)
+    to_port         = optional(number)
+    icmp_code       = optional(number)
+    icmp_type       = optional(number)
+    protocol        = any
+    cidr_block      = optional(string)
+    ipv6_cidr_block = optional(string)
+  }))
 
   default = [
     {
@@ -1019,15 +1397,34 @@ variable "elasticache_inbound_acl_rules" {
       rule_action = "allow"
       from_port   = 0
       to_port     = 0
-      protocol    = "-1"
+      protocol    = -1
       cidr_block  = "0.0.0.0/0"
     },
   ]
+
+  validation {
+    condition     = alltrue([for rule in var.elasticache_inbound_acl_rules : can(cidrhost(rule.cidr_block, 0)) || rule.cidr_block == null])
+    error_message = "The values for cidr_block must all be valid IPv4 CIDRs."
+  }
+  validation {
+    condition     = alltrue([for rule in var.elasticache_inbound_acl_rules : can(cidrhost(rule.ipv6_cidr_block, 0)) || rule.ipv6_cidr_block == null])
+    error_message = "The values for ipv6_cidr_block must all be valid IPv6 CIDRs."
+  }
 }
 
 variable "elasticache_outbound_acl_rules" {
   description = "Elasticache subnets outbound network ACL rules"
-  type        = list(map(string))
+  type = list(object({
+    rule_number     = number
+    rule_action     = string
+    from_port       = optional(number)
+    to_port         = optional(number)
+    icmp_code       = optional(number)
+    icmp_type       = optional(number)
+    protocol        = any
+    cidr_block      = optional(string)
+    ipv6_cidr_block = optional(string)
+  }))
 
   default = [
     {
@@ -1035,10 +1432,19 @@ variable "elasticache_outbound_acl_rules" {
       rule_action = "allow"
       from_port   = 0
       to_port     = 0
-      protocol    = "-1"
+      protocol    = -1
       cidr_block  = "0.0.0.0/0"
     },
   ]
+
+  validation {
+    condition     = alltrue([for rule in var.elasticache_outbound_acl_rules : can(cidrhost(rule.cidr_block, 0)) || rule.cidr_block == null])
+    error_message = "The values for cidr_block must all be valid IPv4 CIDRs."
+  }
+  validation {
+    condition     = alltrue([for rule in var.elasticache_outbound_acl_rules : can(cidrhost(rule.ipv6_cidr_block, 0)) || rule.ipv6_cidr_block == null])
+    error_message = "The values for ipv6_cidr_block must all be valid IPv6 CIDRs."
+  }
 }
 
 variable "manage_default_security_group" {
@@ -1055,8 +1461,26 @@ variable "default_security_group_name" {
 
 variable "default_security_group_ingress" {
   description = "List of maps of ingress rules to set on the default security group"
-  type        = list(map(string))
-  default     = []
+  type = list(object({
+    cidr_blocks      = optional(string, "")
+    ipv6_cidr_blocks = optional(string, "")
+    prefix_list_ids  = optional(string, "")
+    security_groups  = optional(string, "")
+    description      = optional(string)
+    from_port        = optional(number, 0)
+    to_port          = optional(number, 0)
+    protocol         = optional(number, -1)
+  }))
+  default = []
+
+  validation {
+    condition     = alltrue([for rule in var.default_security_group_ingress : can(cidrhost(rule.cidr_blocks, 0)) || rule.cidr_block == null])
+    error_message = "The values for cidr_blocks must all be valid IPv4 CIDRs."
+  }
+  validation {
+    condition     = alltrue([for rule in var.default_security_group_ingress : can(cidrhost(rule.ipv6_cidr_blocks, 0)) || rule.ipv6_cidr_blocks == null])
+    error_message = "The values for ipv6_cidr_blocks must all be valid IPv6 CIDRs."
+  }
 }
 
 variable "enable_flow_log" {
@@ -1067,8 +1491,26 @@ variable "enable_flow_log" {
 
 variable "default_security_group_egress" {
   description = "List of maps of egress rules to set on the default security group"
-  type        = list(map(string))
-  default     = []
+  type = list(object({
+    cidr_blocks      = optional(string, "")
+    ipv6_cidr_blocks = optional(string, "")
+    prefix_list_ids  = optional(string, "")
+    security_groups  = optional(string, "")
+    description      = optional(string)
+    from_port        = optional(number, 0)
+    to_port          = optional(number, 0)
+    protocol         = optional(number, -1)
+  }))
+  default = []
+
+  validation {
+    condition     = alltrue([for rule in var.default_security_group_egress : can(cidrhost(rule.cidr_blocks, 0)) || rule.cidr_block == null])
+    error_message = "The values for cidr_blocks must all be valid IPv4 CIDRs."
+  }
+  validation {
+    condition     = alltrue([for rule in var.default_security_group_egress : can(cidrhost(rule.ipv6_cidr_blocks, 0)) || rule.ipv6_cidr_blocks == null])
+    error_message = "The values for ipv6_cidr_blocks must all be valid IPv6 CIDRs."
+  }
 }
 
 variable "default_security_group_tags" {
@@ -1093,12 +1535,22 @@ variable "flow_log_traffic_type" {
   description = "The type of traffic to capture. Valid values: ACCEPT, REJECT, ALL."
   type        = string
   default     = "ALL"
+
+  validation {
+    condition     = contains(["ACCEPT", "REJECT", "ALL"], var.flow_log_traffic_type)
+    error_message = "The valid values for flow_log_traffic_type are: ACCEPT, REJECT, ALL."
+  }
 }
 
 variable "flow_log_destination_type" {
   description = "Type of flow log destination. Can be s3 or cloud-watch-logs."
   type        = string
   default     = "cloud-watch-logs"
+
+  validation {
+    condition     = contains(["cloud-watch-logs", "s3"], var.flow_log_destination_type)
+    error_message = "The valid values for flow_log_destination_type are: s3, cloud-watch-logs."
+  }
 }
 
 variable "flow_log_log_format" {
@@ -1129,6 +1581,12 @@ variable "flow_log_cloudwatch_log_group_retention_in_days" {
   description = "Specifies the number of days you want to retain log events in the specified log group for VPC flow logs."
   type        = number
   default     = null
+
+  validation {
+    condition     = contains(["null", 1, 3, 5, 7, 14, 30, 60, 90, 120, 150, 180, 365, 400, 545, 731, 1827, 3653, 0], coalesce(var.flow_log_cloudwatch_log_group_retention_in_days, "null"))
+    error_message = "The values for flow_log_cloudwatch_log_group_retention_in_days are: 1, 3, 5, 7, 14, 30, 60, 90, 120, 150, 180, 365, 400, 545, 731, 1827, 3653, 0."
+  }
+
 }
 
 variable "flow_log_cloudwatch_log_group_kms_key_id" {
@@ -1141,6 +1599,11 @@ variable "flow_log_max_aggregation_interval" {
   description = "The maximum interval of time during which a flow of packets is captured and aggregated into a flow log record. Valid Values: `60` seconds or `600` seconds."
   type        = number
   default     = 600
+
+  validation {
+    condition     = contains([60, 600], var.flow_log_max_aggregation_interval)
+    error_message = "The values for flow_log_max_aggregation_interval must be 60 or 600."
+  }
 }
 
 variable "create_igw" {
@@ -1171,9 +1634,9 @@ variable "flow_log_file_format" {
   description = "(Optional) The format for the flow log. Valid values: `plain-text`, `parquet`."
   type        = string
   default     = "plain-text"
+
   validation {
-    condition = can(regex("^(plain-text|parquet)$",
-    var.flow_log_file_format))
+    condition     = contains(["plain-text", "parquet"], var.flow_log_file_format)
     error_message = "ERROR valid values: plain-text, parquet."
   }
 }
